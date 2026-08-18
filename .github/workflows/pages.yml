@@ -68,6 +68,11 @@ jobs:
           test -f _site/.nojekyll
           grep -q 'name="robots"' _site/app/login.html
 
+          # The API has real server-side state and no rate limiting. It is local-only
+          # by design and must never reach the published site. See SECURITY.md.
+          test ! -e _site/mock-api
+          test ! -e _site/load-test
+
       # enablement: turns Pages on with this workflow as the source if it is not
       # configured yet, so no manual Settings visit is needed on a fresh repo.
       - uses: actions/configure-pages@v5

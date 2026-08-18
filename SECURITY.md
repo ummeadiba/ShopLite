@@ -2,10 +2,12 @@
 
 ## This repository contains insecure code on purpose
 
-ShopLite is a **training target** for QA practice. The application under `app/` is
-seeded with deliberate defects, including security ones: a hard-coded master password,
-missing authentication and role guards, cross-site scripting sinks, credentials written
-to `localStorage` and the browser console, and payment data rendered in full.
+ShopLite is a **training target** for QA practice. The application under `app/` and the
+API under `mock-api/` are seeded with deliberate defects, including security ones: a
+hard-coded master password, missing authentication and role guards, cross-site scripting
+sinks, credentials written to `localStorage` and the browser console, payment data
+rendered in full, a forgeable session token, an IDOR on `/api/orders/:id`, an admin
+endpoint that returns plaintext passwords, and no rate limiting on login.
 
 **Please do not report these as vulnerabilities.** They are the exercise. A report that
 `app/login.html` accepts a master password is a correct observation about a fixture, not
@@ -42,6 +44,20 @@ as, a real sign-in form. So:
 
 If you believe the hosted copy is being abused — linked from somewhere as a genuine
 login, for instance — please open an issue and it will be taken down.
+
+## The API is a different matter — never host it
+
+Only the static web app is published. `mock-api/server.js` binds to `127.0.0.1` and must
+stay there.
+
+The distinction is real. The app has no server: its "vulnerabilities" execute in the
+visitor's own browser against data only they can see. The API does have a server, and it
+holds users, tokens and orders. Exposed to the internet it would be an open endpoint that
+returns other people's card numbers and plaintext passwords to anyone who asks, with no
+rate limit in front of it. Nothing about it is safe to share, and it never needs to be —
+each candidate runs their own copy.
+
+If you fork this, do not add a deploy step for `mock-api/`.
 
 ## Still do not use it for real
 

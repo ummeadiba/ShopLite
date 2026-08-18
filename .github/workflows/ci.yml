@@ -45,3 +45,44 @@ jobs:
 
           # tools/static-server.js must not serve anything outside app/.
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/../package.json)" != 200
+
+      - name: mock API boots and answers
+        run: |
+          node mock-api/server.js > /tmp/mock-api.log 2>&1 &
+          SERVER=$!
+          trap 'kill $SERVER 2>/dev/null || true' EXIT
+
+          for i in $(seq 1 20); do
+            curl -sf http://127.0.0.1:4000/api/health > /dev/null && break
+            sleep 0.5
+          done
+
+          # Only the contract's happy path is asserted. The planted defects are the
+          # assessment; pinning them here would make rotating them a CI failure.
+          curl -sf http://127.0.0.1:4000/api/health | grep -q '"status": "ok"'
+          curl -sf http://127.0.0.1:4000/api/products | grep -q "Aurora 14 Laptop"
+          curl -sf -X POST http://127.0.0.1:4000/api/login \
+            -H "Content-Type: application/json" \
+            -d '{"email":"qa@shoplite.test","password":"Passw0rd!23"}' | grep -q '"token"'
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4000/api/nope)" = 404
+
+      - name: load generator runs and reports percentiles
+        run: |
+          node mock-api/server.js > /tmp/mock-api2.log 2>&1 &
+          SERVER=$!
+          trap 'kill $SERVER 2>/dev/null || true' EXIT
+
+          for i in $(seq 1 20); do
+            curl -sf http://127.0.0.1:4000/api/health > /dev/null && break
+            sleep 0.5
+          done
+
+          node load-test/run-load.js --path /api/health --vus 4 --seconds 3 > /tmp/load.txt
+          cat /tmp/load.txt
+          grep -q "p95" /tmp/load.txt
+          grep -q "throughput" /tmp/load.txt
+          # A run made entirely of connection errors means the harness is broken.
+          if grep -q "connection errors" /tmp/load.txt; then
+            echo "load generator could not reach the API"
+            exit 1
+          fi

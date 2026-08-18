@@ -19,7 +19,7 @@ in the product, on every page.
 |---|---|
 | Web app | <https://ummeadiba.github.io/ShopLite/app/login.html> |
 | Web app (offline) | `http://127.0.0.1:5173` (start with `node tools/static-server.js`) |
-| Mock API | `http://127.0.0.1:4000` — **not included in this release**, see §10 |
+| Mock API | `http://127.0.0.1:4000` (start with `node mock-api/server.js`) |
 | Customer account | `qa@shoplite.test` / `Passw0rd!23` |
 | Admin account | `admin@shoplite.test` / `Admin@2024` (API only) |
 | Supported browsers | Chrome, Edge, Firefox — current versions |
@@ -185,12 +185,8 @@ in the product, on every page.
 
 ## 10. API contract (`http://127.0.0.1:4000`)
 
-> **Scope note.** The mock API these clauses describe is **not included in this
-> release** — there is no service listening on port 4000. The clauses are retained
-> because the numbering is cited elsewhere and because a tester should be able to
-> read a contract and say what they would check. Unless an interviewer supplies the
-> API separately, treat §10 as **untestable in this environment** and state that in
-> your report rather than inventing results for it.
+The API runs locally: `node mock-api/server.js`. All its data is held in memory, so
+restarting the process resets carts and orders.
 
 - **10.1** `GET /api/health` → `200 {"status":"ok"}`.
 - **10.2** HTTP status codes carry meaning: `200` success, `400` invalid input,
@@ -219,8 +215,7 @@ in the product, on every page.
 
 ## 11. Non-functional requirements
 
-**Performance (NFR-P)** — targets for the API described in §10, and therefore
-**untestable in this release** for the same reason.
+**Performance (NFR-P)** — measured against the API in §10.
 - **11.1** Under **50 concurrent users** for 60 seconds against the API:
   p95 latency < **800 ms**, p99 < **1,500 ms**, error rate < **1%**.
 - **11.2** No endpoint's p95 exceeds 2× its single-user latency at 20 concurrent users.

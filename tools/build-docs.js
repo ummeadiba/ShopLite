@@ -58,6 +58,8 @@ function inline(text) {
   });
 
   s = escapeHtml(s);
+  // <https://example.com> — GitHub linkifies these, so the site must too.
+  s = s.replace(/&lt;(https?:\/\/[^\s&]+)&gt;/g, '<a href="$1">$1</a>');
   s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>');
   s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   s = s.replace(/(^|[\s(])\*([^*]+)\*/g, '$1<em>$2</em>');
@@ -351,14 +353,23 @@ function indexPage() {
 
 /* ---------- build ---------- */
 
-// A link to a sibling Markdown file resolves on GitHub but not on the site, so
-// point it at the generated page instead.
+const REPO_BLOB = 'https://github.com/ummeadiba/ShopLite/blob/main/';
+
+// Links in the Markdown are written repo-relative so they work when the files are
+// read on github.com. On the published site only docs/ and app/ exist, so:
+//   PRODUCT-SPEC.md      -> the generated page
+//   load-test/README.md  -> the file on github.com
 function crossLinks(html) {
   let out = html;
+  const onSite = new Set(['index.html'].concat(PAGES.map(p => p.out)));
+
   for (const p of PAGES) {
     out = out.split('href="' + p.src + '"').join('href="' + p.out + '"');
   }
-  return out;
+
+  return out.replace(/href="(?!https?:|#|mailto:|app\/)([^"]+)"/g, function (whole, href) {
+    return onSite.has(href) ? whole : 'href="' + REPO_BLOB + href + '"';
+  });
 }
 
 function build() {

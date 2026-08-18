@@ -9,6 +9,8 @@
   },
   "scripts": {
     "start": "node tools/static-server.js",
+    "api": "node mock-api/server.js",
+    "load": "node load-test/run-load.js",
     "docs": "node tools/build-docs.js",
     "docs:check": "node tools/build-docs.js --check"
   },
@@ -17,6 +19,8 @@
     "software-testing",
     "test-automation",
     "playwright",
+    "api-testing",
+    "load-testing",
     "assessment",
     "vulnerable-app"
   ]

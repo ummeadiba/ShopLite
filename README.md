@@ -1,9 +1,9 @@
 # ShopLite — QA Practical Assessment
 
-A small e-commerce web app that is **deliberately broken**, plus the specification it
-is supposed to satisfy. Use it as a hiring practical for fresher Software QA
-Engineers, or as a sandbox for practising exploratory testing, defect reporting and
-Playwright automation.
+A small e-commerce web app and REST API that are **deliberately broken**, plus the
+specification they are supposed to satisfy. Use it as a hiring practical for fresher
+Software QA Engineers, or as a sandbox for practising exploratory testing, defect
+reporting, API security testing, Playwright automation and load testing.
 
 🛒 **[Open the app](https://ummeadiba.github.io/ShopLite/app/login.html)** — the system
 under test, hosted
@@ -23,24 +23,31 @@ the oracle candidates test against
 
 ## Quick start
 
-Candidates need nothing but a browser — open the hosted app and sign in with:
+The **web app** is hosted — candidates need nothing but a browser. Open it and sign in
+with:
 
 ```text
 qa@shoplite.test / Passw0rd!23
 ```
 
-To run it offline, or to work on the fixture itself, Node.js 18+ is the only
-requirement:
+The **API** runs locally, on purpose (see [below](#why-the-api-is-not-hosted)).
+Node.js 18+ is the only requirement:
 
 ```powershell
 git clone https://github.com/ummeadiba/ShopLite.git
 cd ShopLite
-node tools/static-server.js
+node mock-api/server.js          # API  -> http://127.0.0.1:4000/api/health
+node tools/static-server.js      # app  -> http://127.0.0.1:5173/login.html  (optional)
 ```
 
-`npm start` does the same thing, serving the identical pages at
-<http://127.0.0.1:5173/login.html>. There is nothing to `npm install` — the app, the
-static server and the docs build are all dependency-free.
+`npm run api` and `npm start` are the same two commands. Try the load generator:
+
+```powershell
+node load-test/run-load.js --path /api/report --vus 20 --seconds 15
+```
+
+There is nothing to `npm install` — the app, the API, the static server, the load
+generator and the docs build are all dependency-free.
 
 The app keeps all its state in `localStorage`. To get back to a clean slate, run this
 in the browser console:
@@ -63,6 +70,13 @@ app/                       The system under test — no build step, no dependenc
   assets/app.js            shared catalogue, cart storage, money helpers, header
   assets/style.css         all styling
 
+mock-api/
+  server.js                Defective REST API on :4000 — zero dependencies, in-memory
+
+load-test/
+  run-load.js              Load generator with percentiles — zero dependencies
+  README.md                Options, how to read the output, what earns marks
+
 tools/
   static-server.js         serves app/ over http on :5173 — zero dependencies
   build-docs.js            renders the Markdown docs into docs/ — zero dependencies
@@ -76,10 +90,10 @@ docs/                      GitHub Pages site. Generated — do not hand-edit
 CANDIDATE-BRIEF.md         Source of truth for the brief page
 PRODUCT-SPEC.md            Source of truth for the spec page
 SECURITY.md                Why this repository contains vulnerable code on purpose
-package.json               npm start / npm run docs — no dependencies
+package.json               npm start / npm run api / npm run load / npm run docs
 
 .github/workflows/
-  ci.yml                   Checks docs/ is in sync and that the app still serves
+  ci.yml                   Checks docs/ is in sync, and that app and API still serve
   pages.yml                Assembles and deploys the hosted site
 ```
 
@@ -90,18 +104,24 @@ relative links and Playwright's `baseURL` all behave the way they would on a rea
 
 ## How the assessment works
 
-Candidates get the two documents and the running app. They produce four artefacts —
-a defect report, a test case sheet, two Playwright tests, and a release
-recommendation. The brief spells out the format of each.
+Candidates get the two documents, the hosted app and the local API. They produce six
+artefacts — a defect report, a test case sheet, two Playwright tests, API findings, a
+load-test report, and a release recommendation. The brief spells out the format of each.
 
 Defects are spread deliberately across authentication, session handling, the
-catalogue, cart arithmetic, coupons, checkout validation, the admin page and
-accessibility, so that no single skill carries a candidate:
+catalogue, cart arithmetic, coupons, checkout validation, the admin page,
+accessibility, the API and its performance, so that no single skill carries a candidate:
 
 - roughly a third are visible to anyone who looks carefully
 - roughly a third need deliberate negative testing, boundary values or DevTools
 - the rest need arithmetic, accessibility knowledge or security instinct — a missing
-  auth guard, a stored password, a total that goes negative
+  auth guard, a stored password, a total that goes negative, a forgeable token
+
+| Surface | Covers |
+|---|---|
+| Hosted web app | Spec §2–§9, §11.4–§11.13 — tasks 1 to 3 |
+| Local API | Spec §10 — task 4: status codes, auth, tokens, IDOR, input handling, CORS |
+| Local API under load | Spec §11.1–§11.3 — task 5: percentiles, degradation under concurrency |
 
 **Always pair a take-home with a live walkthrough.** Assume candidates use AI
 assistance; the brief tells them so openly. What AI cannot fake is explaining a
@@ -113,32 +133,59 @@ rating.
 1. **Before the candidate arrives**, open the hosted app and confirm it loads. Setup
    problems must not eat their clock.
 2. **Use a fresh browser profile per candidate.** `localStorage` survives between
-   sittings and will confuse them. There is no server state to reset — the hosted copy
-   is static, so candidates cannot interfere with each other.
-3. Send the two document links. Everything they need is in those.
-4. Keep your answer key and marking sheet **outside this repository** — it is public,
+   sittings and will confuse them. The hosted app is static, so candidates cannot
+   interfere with each other there.
+3. **Each candidate runs their own API.** That is the point of not hosting it: nobody
+   else's load test pollutes their percentiles. Tell them to restart
+   `node mock-api/server.js` if a long load run leaves it sluggish — its state is in
+   memory, and one of the planted performance defects is cumulative.
+4. Send the two document links. Everything they need is in those.
+5. **For tasks 4 and 5 they need a terminal**, Node.js 18+ and a clone of the repo.
+   Confirm that is available before you schedule a timed sitting; a candidate fighting
+   a corporate proxy is not being assessed on testing.
+6. Keep your answer key and marking sheet **outside this repository** — it is public,
    and so is anything you commit to it.
 
 ---
 
-## Not included
+## Why the API is not hosted
 
-The specification's §10 (API contract) and §11.1–11.3 (performance targets) describe a
-mock REST API that **is not part of this repository**. Both sections are marked as out
-of scope in the spec and in the brief. The web app is entirely client-side and makes
-no network calls, so it runs without one.
+The web app is hosted and the API deliberately is not. That asymmetry is the design, not
+an unfinished job:
 
-If you want API and load-testing rounds, supply your own service on port 4000 matching
-§10 and tell candidates its base URL.
+- **Load-test numbers have to mean something.** Spec §11.1 states absolute targets —
+  p95 under 800 ms at 50 concurrent users. On a free cloud tier, cold starts and shared
+  CPU swamp those numbers, so a candidate would be measuring the host, not the API. On
+  `127.0.0.1` the planted performance defects are the dominant signal.
+- **Candidates must not collide.** One shared endpoint plus two candidates running 50-VU
+  load tests produces two useless reports. A local API is a private API.
+- **The API holds real server-side state.** Unlike the app, it has orders, users and
+  tokens on the server, and it is defective by design: no rate limiting, an IDOR on
+  `/api/orders/:id`, an admin endpoint that returns plaintext passwords. Hosting *that*
+  publicly would be careless, where hosting the static app is not.
+
+API testing needs a terminal anyway, so the browser-only convenience the hosted app
+provides was never available for tasks 4 and 5.
+
+The web app makes no network calls of its own, so the two run independently — the API is
+a separate surface to test, not a backend the UI depends on.
 
 ---
 
 ## Maintaining this
 
-**Do not "fix" the app.** Every oddity in `app/` is either a planted defect or the
-scaffolding for one — the `<title>Document</title>` on the login page, the two
-different money formatters in `assets/app.js`, the `TODO(dev)` comments that leak the
-admin URL. Changing them silently removes findings the assessment depends on.
+**Do not "fix" the app or the API.** Every oddity in `app/` and `mock-api/` is either a
+planted defect or the scaffolding for one — the `<title>Document</title>` on the login
+page, the two different money formatters in `assets/app.js`, the `RATE_LIMIT` constant in
+`mock-api/server.js` that is declared and never enforced, the `checksum` loop in
+`/api/report` that makes it collapse under concurrency. Changing them silently removes
+findings the assessment depends on.
+
+**The API source is public**, so a candidate can read the defects rather than discover
+them. That is a deliberate trade for having a single public repository. Grade the
+demonstration and the write-up — a working exploit, a correct severity, a clear impact
+statement — not the discovery. The live walkthrough is where reading-versus-finding
+becomes obvious.
 
 **The Markdown files are the source of truth for the docs.** After editing
 `CANDIDATE-BRIEF.md` or `PRODUCT-SPEC.md`, regenerate the pages:
