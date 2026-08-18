@@ -17,7 +17,8 @@ in the product, on every page.
 
 | Item | Value |
 |---|---|
-| Web app | `http://127.0.0.1:5173` (start with `node tools/static-server.js`) |
+| Web app | <https://ummeadiba.github.io/ShopLite/app/login.html> |
+| Web app (offline) | `http://127.0.0.1:5173` (start with `node tools/static-server.js`) |
 | Mock API | `http://127.0.0.1:4000` — **not included in this release**, see §10 |
 | Customer account | `qa@shoplite.test` / `Passw0rd!23` |
 | Admin account | `admin@shoplite.test` / `Admin@2024` (API only) |

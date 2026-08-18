@@ -16,14 +16,19 @@ application is wrong — report it.
 
 | Item | Value |
 |---|---|
-| Start the app | `node tools/static-server.js` |
-| Open | `http://127.0.0.1:5173/login.html` |
+| App | <https://ummeadiba.github.io/ShopLite/app/login.html> |
 | Test account | `qa@shoplite.test` / `Passw0rd!23` |
 | Reset state | `localStorage.clear(); sessionStorage.clear()` in the browser console |
 | Browser | Chrome, Edge or Firefox — current version, DevTools open |
 
-Nothing needs installing to run the app. Node.js is required for the static server,
-and for Playwright if you attempt task 3.
+The app is hosted, so there is nothing to install or start. It runs entirely in your
+browser and keeps its state in your own `localStorage`, so you cannot disturb another
+candidate — and clearing storage resets you to a clean slate.
+
+**Use a throwaway password.** The app stores what you type in plain text and prints it
+to the console; that is one of the defects. Never type a real credential into it.
+
+Node.js is only needed if you attempt the Playwright task.
 
 Use whatever tools you normally would, AI assistants included. You will be asked to
 walk through your submission line by line afterwards, so submit only what you can
@@ -79,8 +84,8 @@ npm install --save-dev @playwright/test
 npx playwright install chromium
 ```
 
-Point `baseURL` at `http://127.0.0.1:5173` and start the static server before the run.
-Include your config and a one-line command to execute the suite.
+Point `baseURL` at `https://ummeadiba.github.io/ShopLite/app/` — the hosted app needs no
+local server. Include your config and a one-line command to execute the suite.
 
 ### 4. Release recommendation
 

@@ -349,6 +349,33 @@ tbody tr:last-child td { border-bottom: 0; }
   color: var(--accent);
 }
 
+/* ---------- call to action ---------- */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  margin: 1.6rem 0 0;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.6rem 1.15rem;
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.97rem;
+  text-decoration: none;
+}
+.btn:hover { filter: brightness(1.08); }
+
+.btn-note {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
 .notice {
   margin: 2rem 0 0;
   padding: 1rem 1.2rem;

@@ -5,6 +5,8 @@ is supposed to satisfy. Use it as a hiring practical for fresher Software QA
 Engineers, or as a sandbox for practising exploratory testing, defect reporting and
 Playwright automation.
 
+🛒 **[Open the app](https://ummeadiba.github.io/ShopLite/app/login.html)** — the system
+under test, hosted
 📄 **[Candidate Brief](https://ummeadiba.github.io/ShopLite/candidate-brief.html)** —
 the question paper
 📄 **[Product Specification](https://ummeadiba.github.io/ShopLite/product-spec.html)** —
@@ -13,14 +15,22 @@ the oracle candidates test against
 > [!WARNING]
 > Every flaw in `app/` is planted on purpose: missing authentication guards, a master
 > password, XSS sinks, passwords written to `localStorage` and the console, card data
-> shown in full, broken money arithmetic. **Do not host this app on a public URL and
-> do not copy its patterns into anything real.** See [SECURITY.md](SECURITY.md).
+> shown in full, broken money arithmetic. The hosted copy is safe to publish because
+> the app has no backend and no shared state — but **never type a real credential into
+> it, and do not copy its patterns into anything real.** See [SECURITY.md](SECURITY.md).
 
 ---
 
 ## Quick start
 
-Node.js 18+ is the only requirement.
+Candidates need nothing but a browser — open the hosted app and sign in with:
+
+```text
+qa@shoplite.test / Passw0rd!23
+```
+
+To run it offline, or to work on the fixture itself, Node.js 18+ is the only
+requirement:
 
 ```powershell
 git clone https://github.com/ummeadiba/ShopLite.git
@@ -28,14 +38,9 @@ cd ShopLite
 node tools/static-server.js
 ```
 
-`npm start` does the same thing. There is nothing to `npm install` — the app, the
+`npm start` does the same thing, serving the identical pages at
+<http://127.0.0.1:5173/login.html>. There is nothing to `npm install` — the app, the
 static server and the docs build are all dependency-free.
-
-Open <http://127.0.0.1:5173/login.html> and sign in with:
-
-```text
-qa@shoplite.test / Passw0rd!23
-```
 
 The app keeps all its state in `localStorage`. To get back to a clean slate, run this
 in the browser console:
@@ -72,7 +77,10 @@ CANDIDATE-BRIEF.md         Source of truth for the brief page
 PRODUCT-SPEC.md            Source of truth for the spec page
 SECURITY.md                Why this repository contains vulnerable code on purpose
 package.json               npm start / npm run docs — no dependencies
-.github/workflows/ci.yml   Checks docs/ is in sync and that the app still serves
+
+.github/workflows/
+  ci.yml                   Checks docs/ is in sync and that the app still serves
+  pages.yml                Assembles and deploys the hosted site
 ```
 
 Serving over `http://` rather than opening the files directly matters: `localStorage`,
@@ -102,11 +110,12 @@ rating.
 
 ### Running a sitting
 
-1. **Before the candidate arrives**, confirm `node tools/static-server.js` serves the
-   login page. Setup problems must not eat their clock.
+1. **Before the candidate arrives**, open the hosted app and confirm it loads. Setup
+   problems must not eat their clock.
 2. **Use a fresh browser profile per candidate.** `localStorage` survives between
-   sittings and will confuse them.
-3. Hand over the two documents. Everything they need is in those.
+   sittings and will confuse them. There is no server state to reset — the hosted copy
+   is static, so candidates cannot interfere with each other.
+3. Send the two document links. Everything they need is in those.
 4. Keep your answer key and marking sheet **outside this repository** — it is public,
    and so is anything you commit to it.
 
@@ -149,11 +158,34 @@ clause, search the repository for references to the old number first.
 the planted defects rather than the questions: move the XSS sink to a different field,
 invert a calculation, add the missing auth guard back and remove a different one.
 
-### Publishing the docs
+### How the hosted site is built
 
-GitHub Pages, `main` branch, `/docs` folder. `docs/.nojekyll` is committed so the
-files are served as-is. Only `docs/` is published — the defective app under `app/` is
-never hosted.
+[.github/workflows/pages.yml](.github/workflows/pages.yml) deploys on every push to
+`main`. It assembles one site from two directories:
+
+```text
+/                     docs/         the three documentation pages
+/app/login.html       app/          the system under test, copied verbatim
+```
+
+**Set-up, once:** Settings → Pages → Source → **GitHub Actions**. Not "Deploy from a
+branch" — the workflow needs to combine `docs/` and `app/`, which branch deploys cannot
+do.
+
+Two details worth knowing before you change that workflow:
+
+- It refuses to publish if `docs/` is out of sync with the Markdown, then asserts every
+  expected file exists in the assembled site. A silent half-deploy is the failure mode
+  worth guarding against.
+- It injects `<meta name="robots" content="noindex, nofollow">` into each published page
+  under `/app/`. `app/` in the repository is never touched. This keeps a realistic fake
+  login form out of search results, which is what would otherwise land the domain on a
+  phishing blocklist.
+
+`localStorage` is scoped per origin, not per path, so the app shares storage with
+anything else you host on `ummeadiba.github.io`. Nothing else lives there today; keep it
+in mind if that changes, and note that telling a candidate to run `localStorage.clear()`
+clears that whole origin.
 
 ---
 

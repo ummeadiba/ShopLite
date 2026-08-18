@@ -29,13 +29,14 @@
 <div class="table-scroll"><table>
 <thead><tr><th>Item</th><th>Value</th></tr></thead>
 <tbody>
-<tr><td>Start the app</td><td><code>node tools/static-server.js</code></td></tr>
-<tr><td>Open</td><td><code>http://127.0.0.1:5173/login.html</code></td></tr>
+<tr><td>App</td><td>&lt;https://ummeadiba.github.io/ShopLite/app/login.html&gt;</td></tr>
 <tr><td>Test account</td><td><code>qa@shoplite.test</code> / <code>Passw0rd!23</code></td></tr>
 <tr><td>Reset state</td><td><code>localStorage.clear(); sessionStorage.clear()</code> in the browser console</td></tr>
 <tr><td>Browser</td><td>Chrome, Edge or Firefox — current version, DevTools open</td></tr>
 </tbody></table></div>
-<p>Nothing needs installing to run the app. Node.js is required for the static server, and for Playwright if you attempt task 3.</p>
+<p>The app is hosted, so there is nothing to install or start. It runs entirely in your browser and keeps its state in your own <code>localStorage</code>, so you cannot disturb another candidate — and clearing storage resets you to a clean slate.</p>
+<p><strong>Use a throwaway password.</strong> The app stores what you type in plain text and prints it to the console; that is one of the defects. Never type a real credential into it.</p>
+<p>Node.js is only needed if you attempt the Playwright task.</p>
 <p>Use whatever tools you normally would, AI assistants included. You will be asked to walk through your submission line by line afterwards, so submit only what you can explain and defend.</p>
 <hr>
 <h2 id="tasks"><a class="anchor" href="#tasks" aria-hidden="true">#</a>Tasks</h2>
@@ -57,7 +58,7 @@ cd automation
 npm init -y
 npm install --save-dev @playwright/test
 npx playwright install chromium</code></pre>
-<p>Point <code>baseURL</code> at <code>http://127.0.0.1:5173</code> and start the static server before the run. Include your config and a one-line command to execute the suite.</p>
+<p>Point <code>baseURL</code> at <code>https://ummeadiba.github.io/ShopLite/app/</code> — the hosted app needs no local server. Include your config and a one-line command to execute the suite.</p>
 <h3 id="4-release-recommendation"><a class="anchor" href="#4-release-recommendation" aria-hidden="true">#</a>4. Release recommendation</h3>
 <p><strong>Would you release this build?</strong> One paragraph. Name the single defect that most influenced your answer and explain why it — rather than the others — decided it. A defensible "no" and a defensible "yes, with conditions" both score; an unsupported verdict does not.</p>
 <hr>
