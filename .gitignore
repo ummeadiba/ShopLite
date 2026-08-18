@@ -1,3 +1,7 @@
+# Build output and deploy tooling
+_site/
+.netlify/
+
 # Node
 node_modules/
 npm-debug.log*

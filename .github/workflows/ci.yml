@@ -25,6 +25,18 @@ jobs:
       - name: docs/ matches the Markdown sources
         run: node tools/build-docs.js --check
 
+      # Netlify runs this same command. Catching a broken assembly here is
+      # cheaper than catching it in a failed deploy.
+      - name: site assembles for deployment
+        run: |
+          node tools/build-site.js
+          test -f _site/index.html
+          test -f _site/app/login.html
+          test -f _site/robots.txt
+          grep -q 'name="robots"' _site/app/login.html
+          test ! -e _site/mock-api
+          test ! -e _site/load-test
+
       - name: static server boots and serves the app
         run: |
           # Redirect the server's output: a background process holding the step's

@@ -30,7 +30,7 @@
 <div class="table-scroll"><table>
 <thead><tr><th>Item</th><th>Value</th></tr></thead>
 <tbody>
-<tr><td>App</td><td><a href="https://ummeadiba.github.io/ShopLite/app/login.html">https://ummeadiba.github.io/ShopLite/app/login.html</a></td></tr>
+<tr><td>App</td><td><a href="https://shoplite-qa.netlify.app/app/login.html">https://shoplite-qa.netlify.app/app/login.html</a></td></tr>
 <tr><td>API</td><td><code>http://127.0.0.1:4000</code> — runs on your machine, see below</td></tr>
 <tr><td>Test account</td><td><code>qa@shoplite.test</code> / <code>Passw0rd!23</code></td></tr>
 <tr><td>Reset state</td><td><code>localStorage.clear(); sessionStorage.clear()</code> in the browser console</td></tr>
@@ -67,7 +67,7 @@ cd automation
 npm init -y
 npm install --save-dev @playwright/test
 npx playwright install chromium</code></pre>
-<p>Point <code>baseURL</code> at <code>https://ummeadiba.github.io/ShopLite/app/</code> — the hosted app needs no local server. Include your config and a one-line command to execute the suite.</p>
+<p>Point <code>baseURL</code> at <code>https://shoplite-qa.netlify.app/app/</code> — the hosted app needs no local server. Include your config and a one-line command to execute the suite.</p>
 <h3 id="4-api-testing"><a class="anchor" href="#4-api-testing" aria-hidden="true">#</a>4. API testing</h3>
 <p>Test the API against <a href="product-spec.html"><code>PRODUCT-SPEC.md</code></a> §10 and report your findings in <code>api-findings.md</code>. Cite the clause, give the exact request, and show enough of the response to prove the point.</p>
 <p>These three are a starting point, not the task. Run them and record what comes back:</p>

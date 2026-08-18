@@ -1,6 +1,9 @@
 /* ---------------------------------------------------------------------
-   Builds the GitHub Pages site in docs/ from the Markdown sources at the
+   Builds the documentation pages in docs/ from the Markdown sources at the
    repository root. Zero dependencies.
+
+   tools/build-site.js then assembles docs/ and app/ into _site/, which is
+   what Netlify publishes.
 
        node tools/build-docs.js              write docs/*.html
        node tools/build-docs.js --check      verify docs/ matches the sources
@@ -339,13 +342,17 @@ function indexPage() {
     'password: the app stores what you type in plain text. Do not copy its patterns',
     'into anything real.',
     '</div>',
-    '<h2 id="run-it">Running it locally</h2>',
-    '<p>The hosted copy above is all a candidate needs. To run the app offline, or to',
-    'work on the fixture itself:</p>',
+    '<h2 id="run-it">The local half</h2>',
+    '<p>The hosted app covers tasks 1 to 3. The mock REST API and the load generator',
+    'run on your own machine &mdash; that is deliberate, so that one candidate&rsquo;s',
+    'load test cannot distort another&rsquo;s numbers. Node.js 18+, then:</p>',
     '<pre><code>git clone https://github.com/ummeadiba/ShopLite.git',
     'cd ShopLite',
-    'node tools/static-server.js</code></pre>',
-    '<p>That serves the same pages at <code>http://127.0.0.1:5173/login.html</code>.</p>'
+    'node mock-api/server.js                                   # API on :4000',
+    'node load-test/run-load.js --path /api/report --vus 20</code></pre>',
+    '<p><code>node tools/static-server.js</code> also serves the web app offline at',
+    '<code>http://127.0.0.1:5173/login.html</code>, if you would rather not use the',
+    'hosted copy.</p>'
   ].join('\n');
 
   return page({ title: 'Overview', out: 'index.html', body: body, headings: [], blurb: 'A hiring practical for fresher Software QA Engineers.' });
@@ -387,7 +394,6 @@ function build() {
     });
   }
   files['index.html'] = indexPage();
-  files['.nojekyll'] = '';
 
   return files;
 }

@@ -5,11 +5,11 @@ specification they are supposed to satisfy. Use it as a hiring practical for fre
 Software QA Engineers, or as a sandbox for practising exploratory testing, defect
 reporting, API security testing, Playwright automation and load testing.
 
-🛒 **[Open the app](https://ummeadiba.github.io/ShopLite/app/login.html)** — the system
+🛒 **[Open the app](https://shoplite-qa.netlify.app/app/login.html)** — the system
 under test, hosted
-📄 **[Candidate Brief](https://ummeadiba.github.io/ShopLite/candidate-brief.html)** —
+📄 **[Candidate Brief](https://shoplite-qa.netlify.app/candidate-brief.html)** —
 the question paper
-📄 **[Product Specification](https://ummeadiba.github.io/ShopLite/product-spec.html)** —
+📄 **[Product Specification](https://shoplite-qa.netlify.app/product-spec.html)** —
 the oracle candidates test against
 
 > [!WARNING]
@@ -80,8 +80,9 @@ load-test/
 tools/
   static-server.js         serves app/ over http on :5173 — zero dependencies
   build-docs.js            renders the Markdown docs into docs/ — zero dependencies
+  build-site.js            assembles docs/ + app/ into _site/ for deployment
 
-docs/                      GitHub Pages site. Generated — do not hand-edit
+docs/                      The documentation pages. Generated — do not hand-edit
   index.html               overview and links
   candidate-brief.html     built from CANDIDATE-BRIEF.md
   product-spec.html        built from PRODUCT-SPEC.md
@@ -90,12 +91,15 @@ docs/                      GitHub Pages site. Generated — do not hand-edit
 CANDIDATE-BRIEF.md         Source of truth for the brief page
 PRODUCT-SPEC.md            Source of truth for the spec page
 SECURITY.md                Why this repository contains vulnerable code on purpose
+netlify.toml               Build command, publish directory and headers
 package.json               npm start / npm run api / npm run load / npm run docs
 
 .github/workflows/
-  ci.yml                   Checks docs/ is in sync, and that app and API still serve
-  pages.yml                Assembles and deploys the hosted site
+  ci.yml                   Checks docs/ is in sync, that the site assembles, and
+                           that the app, API and load generator all still work
 ```
+
+`_site/` is build output and is not committed.
 
 Serving over `http://` rather than opening the files directly matters: `localStorage`,
 relative links and Playwright's `baseURL` all behave the way they would on a real site.
@@ -205,34 +209,59 @@ clause, search the repository for references to the old number first.
 the planted defects rather than the questions: move the XSS sink to a different field,
 invert a calculation, add the missing auth guard back and remove a different one.
 
-### How the hosted site is built
+## Deployment (Netlify)
 
-[.github/workflows/pages.yml](.github/workflows/pages.yml) deploys on every push to
-`main`. It assembles one site from two directories:
+The site is hosted on Netlify's free tier. [netlify.toml](netlify.toml) holds the whole
+configuration; there is no build image to configure and nothing to install.
+
+```toml
+command = "node tools/build-docs.js --check && node tools/build-site.js"
+publish = "_site"
+```
+
+[tools/build-site.js](tools/build-site.js) assembles one site from two directories:
 
 ```text
 /                     docs/         the three documentation pages
 /app/login.html       app/          the system under test, copied verbatim
+/robots.txt                         generated, disallows /app/
 ```
 
-**Set-up, once:** Settings → Pages → Source → **GitHub Actions**. Not "Deploy from a
-branch" — the workflow needs to combine `docs/` and `app/`, which branch deploys cannot
-do.
+### Connecting it, once
 
-Two details worth knowing before you change that workflow:
+1. Netlify → **Add new site → Import an existing project** → GitHub →
+   `ummeadiba/ShopLite`.
+2. Leave the build settings alone — `netlify.toml` supplies them. Deploy.
+3. **Site configuration → Change site name** → `shoplite-qa`, so the URL matches the one
+   written into the documents. If you pick a different name, update it in
+   `CANDIDATE-BRIEF.md`, `PRODUCT-SPEC.md`, `SECURITY.md` and this file, then run
+   `npm run docs`.
 
-- It refuses to publish if `docs/` is out of sync with the Markdown, then asserts every
-  expected file exists in the assembled site. A silent half-deploy is the failure mode
-  worth guarding against.
-- It injects `<meta name="robots" content="noindex, nofollow">` into each published page
-  under `/app/`. `app/` in the repository is never touched. This keeps a realistic fake
-  login form out of search results, which is what would otherwise land the domain on a
-  phishing blocklist.
+Every push to `main` redeploys. Netlify's free tier covers this easily: the site is a
+handful of small static files, and nothing runs server-side.
 
-`localStorage` is scoped per origin, not per path, so the app shares storage with
-anything else you host on `ummeadiba.github.io`. Nothing else lives there today; keep it
-in mind if that changes, and note that telling a candidate to run `localStorage.clear()`
-clears that whole origin.
+### Two details worth knowing
+
+- **The build refuses to publish stale docs.** `build-docs.js --check` runs first, so a
+  Markdown edit without a rebuild fails the deploy rather than shipping a stale page.
+  `build-site.js` then asserts each expected file exists, and that `mock-api/`,
+  `load-test/` and `tools/` are absent from the output. A silent half-deploy, or an
+  accidentally published API, are the failure modes worth guarding against.
+- **`/app/` is kept out of search results** — `build-site.js` injects
+  `<meta name="robots" content="noindex, nofollow">` into the published copies and writes
+  a `robots.txt`, and `netlify.toml` adds an `X-Robots-Tag` header. `app/` in the
+  repository is never edited. A realistic fake login form in search results is what would
+  otherwise land the domain on a phishing blocklist.
+
+`localStorage` is scoped per origin, so the app shares storage with anything else you host
+on the same Netlify site. Nothing else does today, but note that telling a candidate to
+run `localStorage.clear()` clears the whole origin.
+
+### If you had GitHub Pages enabled
+
+This repository previously deployed to GitHub Pages, and that workflow has been removed.
+Turn the old site off in **Settings → Pages → Source → None**, or it will keep serving a
+copy at `ummeadiba.github.io/ShopLite` that no longer receives updates.
 
 ---
 

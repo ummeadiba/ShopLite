@@ -12,6 +12,7 @@
     "api": "node mock-api/server.js",
     "load": "node load-test/run-load.js",
     "docs": "node tools/build-docs.js",
+    "site": "node tools/build-docs.js && node tools/build-site.js",
     "docs:check": "node tools/build-docs.js --check"
   },
   "keywords": [

@@ -20,7 +20,7 @@ application is wrong — report it.
 
 | Item | Value |
 |---|---|
-| App | <https://ummeadiba.github.io/ShopLite/app/login.html> |
+| App | <https://shoplite-qa.netlify.app/app/login.html> |
 | API | `http://127.0.0.1:4000` — runs on your machine, see below |
 | Test account | `qa@shoplite.test` / `Passw0rd!23` |
 | Reset state | `localStorage.clear(); sessionStorage.clear()` in the browser console |
@@ -106,7 +106,7 @@ npm install --save-dev @playwright/test
 npx playwright install chromium
 ```
 
-Point `baseURL` at `https://ummeadiba.github.io/ShopLite/app/` — the hosted app needs no
+Point `baseURL` at `https://shoplite-qa.netlify.app/app/` — the hosted app needs no
 local server. Include your config and a one-line command to execute the suite.
 
 ### 4. API testing

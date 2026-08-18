@@ -16,7 +16,7 @@ a finding about a product.
 ## Yes, it is deliberately hosted
 
 The app is published at
-<https://ummeadiba.github.io/ShopLite/app/login.html> so that candidates can be assessed
+<https://shoplite-qa.netlify.app/app/login.html> so that candidates can be assessed
 remotely without a local setup step.
 
 That is a considered decision, not an oversight:
@@ -34,9 +34,9 @@ What is genuinely worth guarding against is the page being mistaken for, or repu
 as, a real sign-in form. So:
 
 - every page under `/app/` is published with `<meta name="robots" content="noindex,
-  nofollow">`, injected at deploy time by
-  [.github/workflows/pages.yml](.github/workflows/pages.yml) — the files in `app/` are
-  never edited
+  nofollow">`, injected at build time by [tools/build-site.js](tools/build-site.js),
+  alongside a generated `robots.txt` and an `X-Robots-Tag` header set in
+  [netlify.toml](netlify.toml) — the files in `app/` are never edited
 - the documentation states plainly that the store is fictional and the credentials are
   test data
 - the brief tells candidates to use a throwaway password, because the app stores what
@@ -65,8 +65,8 @@ If you fork this, do not add a deploy step for `mock-api/`.
   what you type in `localStorage` in plain text and logs it to the console.
 - Do not copy patterns from `app/` into production code.
 - If you fork this and host your own copy, keep the `noindex` step and do not put it on a
-  domain that anything else depends on. `localStorage` is shared per origin, so a fork on
-  `yourname.github.io` shares storage with everything else you host there.
+  domain that anything else depends on. `localStorage` is shared per origin, so a fork
+  sharing a hostname with your other projects shares storage with them too.
 
 ## What is worth reporting
 

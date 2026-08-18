@@ -17,7 +17,7 @@ in the product, on every page.
 
 | Item | Value |
 |---|---|
-| Web app | <https://ummeadiba.github.io/ShopLite/app/login.html> |
+| Web app | <https://shoplite-qa.netlify.app/app/login.html> |
 | Web app (offline) | `http://127.0.0.1:5173` (start with `node tools/static-server.js`) |
 | Mock API | `http://127.0.0.1:4000` (start with `node mock-api/server.js`) |
 | Customer account | `qa@shoplite.test` / `Passw0rd!23` |

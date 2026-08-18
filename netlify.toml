@@ -1,0 +1,29 @@
+# Netlify configuration for the ShopLite QA practical.
+#
+#   /                     the documentation pages   (docs/ -> _site/)
+#   /app/login.html       the system under test     (app/  -> _site/app/)
+#
+# Only the static site is deployed. The mock API in mock-api/ is local-only by
+# design and is never published — see SECURITY.md.
+#
+# There is nothing to install: the build runs two Node scripts from this
+# repository and has no dependencies.
+
+[build]
+  command = "node tools/build-docs.js --check && node tools/build-site.js"
+  publish = "_site"
+
+# A realistic fake sign-in form in search results is how a training fixture
+# ends up on a phishing blocklist. robots.txt covers crawlers that read it;
+# this covers the ones that only honour the header.
+[[headers]]
+  for = "/app/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+# Long-lived immutable assets do not exist here; everything is small and
+# changes on each deploy, so keep it revalidating.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
