@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin - ShopLite</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- TODO(dev): add SL.requireAuth() + role check here before release -->
+
+<div id="hdr"></div>
+
+<div class="container">
+  <h3>Admin dashboard</h3>
+  <p class="muted">Internal use only.</p>
+
+  <div class="card">
+    <h2>Orders</h2>
+    <div>
+      <label for="oq">Find an order</label>
+      <input type="text" id="oq" placeholder="Order reference">
+    </div>
+    <p id="searchMsg"></p>
+    <table>
+      <thead>
+        <tr><th>Reference</th><th>Customer</th><th>Amount</th><th>Card on file</th><th></th></tr>
+      </thead>
+      <tbody id="orderRows"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Session data</h2>
+    <pre id="dump" style="font-size:12px; overflow:auto"></pre>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  SL.renderHeader('admin');
+
+  function renderOrders(filter) {
+    var orders = SL.readOrders();
+    var html = '';
+    for (var i = 0; i < orders.length; i++) {
+      var o = orders[i];
+      if (filter && o.id.indexOf(filter) === -1) { continue; }
+      html += '<tr>' +
+        '<td>' + o.id + '</td>' +
+        '<td>' + o.user + '</td>' +
+        '<td>' + SL.money2(o.amount) + '</td>' +
+        '<td>' + o.card + ' / ' + o.cvv + '</td>' +
+        '<td><button class="link-btn del" data-i="' + i + '">Delete</button></td>' +
+        '</tr>';
+    }
+    document.getElementById('orderRows').innerHTML = html;
+
+    var dels = document.querySelectorAll('.del');
+    for (var j = 0; j < dels.length; j++) {
+      dels[j].addEventListener('click', function () {
+        var all = SL.readOrders();
+        all.splice(Number(this.getAttribute('data-i')), 1);
+        SL.writeOrders(all);
+        renderOrders(document.getElementById('oq').value);
+      });
+    }
+  }
+
+  document.getElementById('oq').addEventListener('input', function () {
+    document.getElementById('searchMsg').innerHTML = 'Results for: ' + this.value;
+    renderOrders(this.value);
+  });
+
+  document.getElementById('dump').textContent =
+    'user: ' + localStorage.getItem(SL.K.user) +
+    '\nlast password: ' + localStorage.getItem('sl_last_password') +
+    '\nauth flag: ' + localStorage.getItem(SL.K.auth);
+
+  renderOrders('');
+</script>
+</body>
+</html>

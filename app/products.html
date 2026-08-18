@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Products - ShopLite</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div id="hdr"></div>
+
+<div class="container">
+  <h3>Product catalogue</h3>
+  <p class="muted">Browse and add items to your cart.</p>
+
+  <div class="filters">
+    <div>
+      <label for="q">Search</label>
+      <input type="text" id="q" placeholder="Search by product name">
+    </div>
+    <div>
+      <label for="cat">Category</label>
+      <select id="cat">
+        <option value="all">All</option>
+        <option value="laptop">Laptop</option>
+        <option value="phone">Phone</option>
+        <option value="accessory">Accessory</option>
+      </select>
+    </div>
+    <div>
+      <label for="sort">Sort by</label>
+      <select id="sort">
+        <option value="none">Default</option>
+        <option value="price-asc">Price: low to high</option>
+        <option value="price-desc">Price: high to low</option>
+        <option value="name-asc">Name: A to Z</option>
+        <option value="rating-desc">Rating: high to low</option>
+      </select>
+    </div>
+  </div>
+
+  <p class="muted" id="count"></p>
+  <div class="grid" id="grid"></div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  SL.requireAuth();
+  SL.renderHeader('products');
+
+  function bumpQty(id) {
+    var cart = SL.readCart();
+    for (var i = 0; i < cart.length; i++) {
+      if (cart[i].id === id) { cart[i].qty = cart[i].qty + 1; }
+    }
+    SL.writeCart(cart);
+  }
+
+  function addToCart(id) {
+    var p = SL.byId(id);
+    var cart = SL.readCart();
+    var line = cart.filter(function (l) { return l.id === id; })[0];
+    if (line) {
+      line.qty = line.qty + 1;
+    } else {
+      cart.push({ id: p.id, name: p.name, price: p.price, qty: 1 });
+    }
+    SL.writeCart(cart);
+    bumpQty(id);
+    SL.updateBadge();
+  }
+
+  function render() {
+    var term = document.getElementById('q').value;
+    var cat = document.getElementById('cat').value;
+    var sort = document.getElementById('sort').value;
+
+    var list = SL.CATALOG.filter(function (p) { return p.name.includes(term); });
+
+    if (cat !== 'all') {
+      list = SL.CATALOG.filter(function (p) { return p.category === cat; });
+    }
+
+    if (sort === 'price-asc') {
+      list.sort(function (a, b) { return String(a.price).localeCompare(String(b.price)); });
+    } else if (sort === 'price-desc') {
+      list.sort(function (a, b) { return String(b.price).localeCompare(String(a.price)); });
+    } else if (sort === 'name-asc') {
+      list.sort(function (a, b) { return a.name.localeCompare(b.name); });
+    } else if (sort === 'rating-desc') {
+      list.sort(function (a, b) { return b.rating - a.rating; });
+    }
+
+    var grid = document.getElementById('grid');
+    document.getElementById('count').textContent = 'Showing 8 of 8 products';
+
+    if (list.length === 0) {
+      grid.innerHTML = '<p class="muted">No products found for "' + term + '"</p>';
+      return;
+    }
+
+    var html = '';
+    for (var i = 0; i < list.length; i++) {
+      var p = list[i];
+      html += '<div class="tile" data-name="' + p.name + '">' +
+        '<img src="' + SL.thumb(p) + '"' + (p.noAlt ? '' : ' alt="' + p.name + '"') + '>' +
+        '<div class="name">' + p.name + '</div>' +
+        '<div class="meta">' + p.category + ' &middot; rating ' + p.rating + '</div>' +
+        '<div class="price">' + SL.money(p.price) + '</div>' +
+        (p.stock
+          ? '<button class="btn add" data-id="' + p.id + '">Add to cart</button>'
+          : '<button class="btn disabled-look add" data-id="' + p.id + '">Out of stock</button>') +
+        '</div>';
+    }
+    grid.innerHTML = html;
+
+    var buttons = document.querySelectorAll('.add');
+    for (var j = 0; j < buttons.length; j++) {
+      buttons[j].addEventListener('click', function () {
+        addToCart(this.getAttribute('data-id'));
+      });
+    }
+  }
+
+  document.getElementById('q').addEventListener('input', render);
+  document.getElementById('cat').addEventListener('change', render);
+  document.getElementById('sort').addEventListener('change', render);
+  render();
+</script>
+</body>
+</html>

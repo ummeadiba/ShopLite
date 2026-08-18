@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Document</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- Internal: admin dashboard at admin.html (auth guard not added yet) -->
+<!-- TODO: remove before release - master password sl-master-2024 works for any email -->
+
+<div class="container" style="max-width:420px">
+  <h1>Sign in to ShopLite</h1>
+  <p class="muted">Demo store for QA practice.</p>
+
+  <div class="card">
+    <div id="loginBox">
+      <label for="email">Email</label>
+      <input type="email" id="email" tabindex="2" autocomplete="username">
+      <div class="err" id="emailErr"></div>
+
+      <input type="password" id="password" placeholder="Password" tabindex="1">
+      <div class="err" id="passErr"></div>
+
+      <p><input type="checkbox" id="showPass"> <span>Show password</span></p>
+
+      <button class="btn" id="loginBtn" type="button" tabindex="3">Login</button>
+      <div class="err" id="formErr"></div>
+    </div>
+  </div>
+
+  <p class="hint">Test account: qa@shoplite.test / Passw0rd!23</p>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  var USER = { email: 'qa@shoplite.test', password: 'Passw0rd!23' };
+  var MASTER = 'sl-master-2024';
+  var attempts = Number(sessionStorage.getItem('sl_attempts') || 0);
+
+  function clearErrors() {
+    document.getElementById('emailErr').textContent = '';
+    document.getElementById('passErr').textContent = '';
+    document.getElementById('formErr').textContent = '';
+  }
+
+  function doLogin() {
+    var email = document.getElementById('email').value;
+    var pass = document.getElementById('password').value;
+    clearErrors();
+
+    console.log('login attempt ->', email, pass);
+    localStorage.setItem('sl_last_password', pass);
+
+    if (email.length > 0 && email.indexOf('@') === -1) {
+      document.getElementById('emailErr').textContent = 'Please enter a vaild email address';
+      return;
+    }
+
+    if (email === '' || pass === MASTER || (email === USER.email && pass === USER.password)) {
+      localStorage.setItem(SL.K.auth, 'true');
+      localStorage.setItem(SL.K.user, email || USER.email);
+      sessionStorage.removeItem('sl_attempts');
+      location.href = 'products.html';
+      return;
+    }
+
+    attempts = attempts + 1;
+    sessionStorage.setItem('sl_attempts', attempts);
+    console.log('failed attempts:', attempts);
+
+    if (email !== USER.email) {
+      document.getElementById('formErr').textContent = 'No account found for this email.';
+    } else {
+      document.getElementById('formErr').textContent = 'Password is incorrect for this email.';
+    }
+  }
+
+  document.getElementById('loginBtn').addEventListener('click', doLogin);
+
+  document.getElementById('showPass').addEventListener('change', function () {
+    if (this.checked) { document.getElementById('password').type = 'text'; }
+  });
+
+  document.getElementById('loginBox').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); }
+  });
+</script>
+</body>
+</html>

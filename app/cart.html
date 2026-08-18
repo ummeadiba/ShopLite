@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cart - ShopLite</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div id="hdr"></div>
+
+<div class="container">
+  <h3>Your cart</h3>
+  <p class="muted">Free delivery on orders over 5,000 after discount.</p>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Unit price</th>
+          <th>Qty</th>
+          <th>Line total</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p id="emptyNote"></p>
+  </div>
+
+  <div class="card">
+    <label for="coupon">Coupon code</label>
+    <div class="row">
+      <div><input type="text" id="coupon" placeholder="e.g. SAVE10"></div>
+      <div><button class="btn secondary" id="applyBtn" type="button">Apply coupon</button></div>
+    </div>
+    <div class="ok" id="couponMsg"></div>
+    <p class="hint">One coupon per order. SAVE10 gives 10% off, capped at 2,000.</p>
+  </div>
+
+  <div class="card">
+    <div class="totals">
+      <div><span>Subtotal</span><span id="sub"></span></div>
+      <div><span>Discount</span><span id="disc"></span></div>
+      <div><span>VAT (7.5%)</span><span id="vat"></span></div>
+      <div><span>Delivery</span><span id="ship"></span></div>
+      <div class="grand"><span>Grand total</span><span id="grand"></span></div>
+    </div>
+    <div class="row" style="margin-top:16px">
+      <div><button class="btn secondary" id="clearBtn" type="button">Clear cart</button></div>
+      <div><button class="btn" id="coBtn" type="button">Proceed to checkout</button></div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  SL.requireAuth();
+  SL.renderHeader('cart');
+
+  function lineTotal(l) { return l.price * l.qty; }
+
+  function render() {
+    var cart = SL.readCart();
+
+    var display = cart.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
+
+    var html = '';
+    for (var i = 0; i < display.length; i++) {
+      var l = display[i];
+      html += '<tr>' +
+        '<td>' + l.name + '</td>' +
+        '<td><input type="number" class="price-in" id="price" value="' + l.price + '" data-i="' + i + '"></td>' +
+        '<td><input type="number" class="qty-in" id="qty" value="' + l.qty + '" data-i="' + i + '"></td>' +
+        '<td class="line">' + SL.money2(lineTotal(l)) + '</td>' +
+        '<td><button class="link-btn rm" data-i="' + i + '">&#10005;</button></td>' +
+        '</tr>';
+    }
+    document.getElementById('rows').innerHTML = html;
+    document.getElementById('emptyNote').textContent = '';
+
+    document.getElementById('sub').textContent   = SL.money2(SL.subtotal());
+    document.getElementById('disc').textContent  = '-' + SL.money2(SL.discount());
+    document.getElementById('vat').textContent   = '৳' + SL.vat();
+    document.getElementById('ship').textContent  = SL.shipping() === 0 ? 'Free' : SL.money2(SL.shipping());
+    document.getElementById('grand').textContent = '৳' + SL.grandTotal();
+
+    bind();
+  }
+
+  function bind() {
+    var qtys = document.querySelectorAll('.qty-in');
+    for (var i = 0; i < qtys.length; i++) {
+      qtys[i].addEventListener('change', function () {
+        var cart = SL.readCart();
+        cart[this.getAttribute('data-i')].qty = Number(this.value);
+        SL.writeCart(cart);
+        render();
+      });
+    }
+
+    var prices = document.querySelectorAll('.price-in');
+    for (var j = 0; j < prices.length; j++) {
+      prices[j].addEventListener('change', function () {
+        var cart = SL.readCart();
+        cart[this.getAttribute('data-i')].price = Number(this.value);
+        SL.writeCart(cart);
+        render();
+      });
+    }
+
+    var rms = document.querySelectorAll('.rm');
+    for (var k = 0; k < rms.length; k++) {
+      rms[k].addEventListener('click', function () {
+        var cart = SL.readCart();
+        cart.splice(Number(this.getAttribute('data-i')), 1);
+        SL.writeCart(cart);
+        render();
+      });
+    }
+  }
+
+  document.getElementById('applyBtn').addEventListener('click', function () {
+    var code = document.getElementById('coupon').value;
+    var res = SL.applyCoupon(code);
+    document.getElementById('couponMsg').textContent = res.message;
+    render();
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', function () {
+    SL.writeCart([]);
+    render();
+  });
+
+  document.getElementById('coBtn').addEventListener('click', function () {
+    location.href = 'checkout.html';
+  });
+
+  render();
+</script>
+</body>
+</html>

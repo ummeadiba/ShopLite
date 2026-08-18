@@ -1,2 +1,17 @@
-# Auto detect text files and perform LF normalization
+# Normalise line endings in the repository.
 * text=auto
+
+# Generated output and anything a script compares byte-for-byte stays LF, so a
+# Windows checkout does not look like drift to tools/build-docs.js --check.
+docs/*.html text eol=lf
+docs/.nojekyll text eol=lf
+*.js text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+
+# Keep the docs out of GitHub's language statistics — this is a QA fixture repo,
+# and the generated HTML would otherwise dominate it.
+docs/* linguist-documentation

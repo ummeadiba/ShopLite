@@ -1,0 +1,23 @@
+{
+  "name": "shoplite-qa-practical",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A deliberately defective e-commerce app and its specification, used as a QA practical assessment.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node tools/static-server.js",
+    "docs": "node tools/build-docs.js",
+    "docs:check": "node tools/build-docs.js --check"
+  },
+  "keywords": [
+    "qa",
+    "software-testing",
+    "test-automation",
+    "playwright",
+    "assessment",
+    "vulnerable-app"
+  ]
+}

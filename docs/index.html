@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overview - ShopLite QA Practical</title>
+<meta name="description" content="A hiring practical for fresher Software QA Engineers.">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="wordmark" href="index.html">ShopLite <span>QA Practical</span></a>
+  <nav aria-label="Documents">
+      <a href="index.html" aria-current="page">Overview</a>
+      <a href="candidate-brief.html">Candidate Brief</a>
+      <a href="product-spec.html">Product Spec</a>
+  </nav>
+</header>
+<div class="shell">
+
+<main id="main" class="prose">
+<h1>ShopLite QA Practical</h1>
+<p class="lede">A hiring practical for fresher Software QA Engineers. The app under
+test is a small e-commerce store seeded with deliberate defects; the specification
+below is the oracle candidates test against.</p>
+<div class="cards">
+  <a class="card" href="candidate-brief.html">
+    <h2>Candidate Brief</h2>
+    <p>The question paper — what to test, what to deliver, how it is judged.</p>
+    <span class="go">Read it &rarr;</span>
+  </a>
+  <a class="card" href="product-spec.html">
+    <h2>Product Specification</h2>
+    <p>The oracle — numbered clauses describing how ShopLite is supposed to behave.</p>
+    <span class="go">Read it &rarr;</span>
+  </a>
+</div>
+<h2 id="run-it">Run the app</h2>
+<pre><code>git clone https://github.com/ummeadiba/ShopLite.git
+cd ShopLite
+node tools/static-server.js</code></pre>
+<p>Then open <code>http://127.0.0.1:5173/login.html</code> and sign in as
+<code>qa@shoplite.test</code> / <code>Passw0rd!23</code>.</p>
+<div class="notice">
+<strong>The defects are the point.</strong> Every bug in <code>app/</code> is
+planted on purpose &mdash; missing auth guards, XSS sinks, broken totals, logged
+passwords. Do not deploy this app anywhere public, and do not copy its patterns
+into anything real.
+</div>
+</main>
+</div>
+<footer class="foot">
+<p>ShopLite v1.0 &middot; deliberately defective by design &middot; <a href="https://github.com/ummeadiba/ShopLite">source on GitHub</a></p>
+</footer>
+</body>
+</html>

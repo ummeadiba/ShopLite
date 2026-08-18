@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout - ShopLite</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div id="hdr"></div>
+
+<div class="container">
+  <div id="formWrap">
+    <h3>Checkout</h3>
+    <p class="muted">Step 2 of 2 - delivery and payment.</p>
+
+    <div class="card">
+      <h2>Delivery address</h2>
+      <div class="row">
+        <div>
+          <label for="fname">Full name</label>
+          <input type="text" id="fname" required>
+          <div class="err" id="fnameErr"></div>
+        </div>
+        <div>
+          <label for="phone">Mobile number</label>
+          <input type="text" id="phone" placeholder="01XXXXXXXXX">
+          <div class="err" id="phoneErr"></div>
+        </div>
+      </div>
+
+      <label for="addr">Street address</label>
+      <textarea id="addr" rows="2"></textarea>
+      <div class="err" id="addrErr"></div>
+
+      <div class="row">
+        <div>
+          <label for="city">City</label>
+          <input type="text" id="city">
+        </div>
+        <div>
+          <label for="zip">Postcode</label>
+          <input type="text" id="zip">
+        </div>
+      </div>
+
+      <label for="note">Gift message (optional)</label>
+      <input type="text" id="note" placeholder="Shown on the delivery slip">
+    </div>
+
+    <div class="card">
+      <h2>Payment</h2>
+      <p>
+        <input type="radio" name="paycard" id="payCard" checked>
+        <label for="payCard" style="display:inline">Credit / debit card</label>
+      </p>
+      <p>
+        <input type="radio" name="paycod" id="payCod">
+        <span class="cod-label">Cash on delivery</span>
+      </p>
+
+      <div class="pay-box" id="cardBox">
+        <label for="card">Card number</label>
+        <input type="text" id="card" placeholder="4111 1111 1111 1111">
+        <div class="err" id="cardErr"></div>
+
+        <div class="row">
+          <div>
+            <label for="exp">Expiry (MM/YY)</label>
+            <input type="text" id="exp" placeholder="09/26">
+            <div class="err" id="expErr"></div>
+          </div>
+          <div>
+            <label for="cvv">CVV</label>
+            <input type="number" id="cvv" maxlength="3">
+            <div class="err" id="cvvErr"></div>
+          </div>
+        </div>
+      </div>
+
+      <p style="margin-top:14px">
+        <input type="checkbox" id="terms">
+        <label for="terms" style="display:inline">I accept the terms and conditions</label>
+      </p>
+
+      <div class="totals">
+        <div><span>Items</span><span id="items"></span></div>
+        <div class="grand"><span>Amount payable</span><span id="payable"></span></div>
+      </div>
+
+      <button class="btn" id="placeBtn" type="button" style="margin-top:14px">Place order</button>
+      <div class="err" id="formErr"></div>
+    </div>
+  </div>
+
+  <div id="doneWrap" style="display:none">
+    <div class="confirm">
+      <h1>Thank you, your order is confirmed</h1>
+      <p>Order reference: <strong id="ordId"></strong></p>
+      <p>Amount charged: <strong id="ordTotal"></strong></p>
+      <p id="ordNote"></p>
+      <p><a href="products.html">Continue shopping</a></p>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  SL.requireAuth();
+  SL.renderHeader('checkout');
+
+  var params = new URLSearchParams(location.search);
+
+  function showDone(id, total, note) {
+    document.getElementById('formWrap').style.display = 'none';
+    document.getElementById('doneWrap').style.display = 'block';
+    document.getElementById('ordId').textContent = id;
+    document.getElementById('ordTotal').textContent = total;
+    document.getElementById('ordNote').innerHTML = note ? 'Gift message: ' + note : '';
+  }
+
+  if (params.get('success') === '1') {
+    showDone(params.get('ref') || 'ORD-1001', '৳' + (params.get('amt') || 0), params.get('note'));
+  }
+
+  document.getElementById('items').textContent = SL.cartUnits() + ' item(s)';
+  document.getElementById('payable').textContent = '৳' + SL.grandTotal();
+
+  function digitsOnly(s) { return s.replace(/[^0-9]/g, ''); }
+
+  function validate() {
+    var ok = true;
+    document.getElementById('fnameErr').textContent = '';
+    document.getElementById('phoneErr').textContent = '';
+    document.getElementById('addrErr').textContent = '';
+    document.getElementById('cardErr').textContent = '';
+    document.getElementById('expErr').textContent = '';
+    document.getElementById('cvvErr').textContent = '';
+
+    var phone = document.getElementById('phone').value;
+    if (phone.length < 5) {
+      document.getElementById('phoneErr').textContent = 'Mobile number looks too short.';
+      ok = false;
+    }
+
+    var card = digitsOnly(document.getElementById('card').value);
+    if (card.length < 8) {
+      document.getElementById('cardErr').textContent = 'Card number looks too short.';
+      ok = false;
+    }
+
+    return ok;
+  }
+
+  document.getElementById('placeBtn').addEventListener('click', function () {
+    document.getElementById('formErr').textContent = '';
+
+    if (!validate()) { return; }
+
+    var amount = SL.grandTotal();
+    var note = document.getElementById('note').value;
+    var id = SL.nextOrderId();
+
+    var orders = SL.readOrders();
+    orders.push({
+      id: id,
+      user: SL.currentUser(),
+      amount: amount,
+      card: document.getElementById('card').value,
+      cvv: document.getElementById('cvv').value,
+      items: SL.readCart(),
+      note: note
+    });
+    SL.writeOrders(orders);
+    console.log('order placed', orders[orders.length - 1]);
+
+    SL.writeCart([]);
+
+    location.href = 'checkout.html?success=1&ref=' + id + '&amt=' + SL.grandTotal() + '&note=' + note;
+  });
+</script>
+</body>
+</html>

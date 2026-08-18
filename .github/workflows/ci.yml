@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # The published pages are generated from the Markdown sources. If someone
+      # edits a .md without rebuilding, the site would silently go stale.
+      - name: docs/ matches the Markdown sources
+        run: node tools/build-docs.js --check
+
+      - name: static server boots and serves the app
+        run: |
+          # Redirect the server's output: a background process holding the step's
+          # stdout open can stop the runner from closing the step.
+          node tools/static-server.js > /tmp/static-server.log 2>&1 &
+          SERVER=$!
+          trap 'kill $SERVER 2>/dev/null || true' EXIT
+
+          for i in $(seq 1 20); do
+            curl -sf http://127.0.0.1:5173/login.html > /dev/null && break
+            sleep 0.5
+          done
+
+          curl -sf http://127.0.0.1:5173/login.html | grep -q "Sign in to ShopLite"
+          curl -sf http://127.0.0.1:5173/assets/app.js > /dev/null
+          curl -sf http://127.0.0.1:5173/assets/style.css > /dev/null
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/nope.html)" = 404
+
+          # tools/static-server.js must not serve anything outside app/.
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/../package.json)" != 200
