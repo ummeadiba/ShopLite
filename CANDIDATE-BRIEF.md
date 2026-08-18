@@ -69,7 +69,7 @@ For each defect give:
 
 - a title that says what is wrong, not what screen it is on
 - numbered steps to reproduce, from a clean state
-- **expected result** — and the clause it comes from, cited as `SPEC 5.4`
+- **expected result** — and the clause it comes from, cited as `SPEC §5.4`
 - **actual result** — what the product did instead
 - severity and priority, with one line justifying the severity
 

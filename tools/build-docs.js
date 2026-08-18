@@ -328,7 +328,9 @@ function indexPage() {
     'test is a small e-commerce store seeded with deliberate defects; the specification',
     'is the oracle candidates test against.</p>',
     '<p class="actions">',
-    '  <a class="btn" href="app/login.html">Open the app &rarr;</a>',
+    // Opens in a new tab so the reader keeps the brief and spec to hand.
+    '  <a class="btn" href="app/login.html" target="_blank" rel="noopener">',
+    '  Open the app &nearr;</a>',
     '  <span class="btn-note">Sign in as <code>qa@shoplite.test</code> /',
     '  <code>Passw0rd!23</code></span>',
     '</p>',

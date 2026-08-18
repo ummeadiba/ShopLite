@@ -202,7 +202,7 @@ Commit the regenerated `docs/*.html` alongside the Markdown change. CI runs
 `node tools/build-docs.js --check` and fails the build if the two drift apart.
 
 **Requirement citations.** `PRODUCT-SPEC.md` numbers its clauses `2.1`, `5.4`, `11.9`
-and so on, and the brief asks candidates to cite them as `SPEC 5.4`. If you renumber a
+and so on, and the brief asks candidates to cite them as `SPEC §5.4`. If you renumber a
 clause, search the repository for references to the old number first.
 
 **Refreshing the paper.** If a set of answers leaks, the cheapest rotation is to change
